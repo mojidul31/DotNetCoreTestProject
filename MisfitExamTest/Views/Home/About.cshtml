@@ -1,0 +1,183 @@
+﻿@model MisfitExamTest.Models.InformationVm
+
+@{
+    ViewData["Title"] = "Information";
+    //int i = 0;
+    //var test = ViewBag.Infos;
+    //Layout = null;
+}
+<style>
+    .buttonC {
+        background-color: #4CAF50;
+        border: none;
+        color: white;
+        padding: 10px 25px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 14px;
+        margin: 4px 2px;
+        cursor: pointer;
+        border-radius:5px;
+        width:90PX;
+    }
+</style>
+
+<h2>Create</h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="FirstNo" class="control-label"></label>
+                <input asp-for="FirstNo" class="form-control" />
+                <span asp-validation-for="FirstNo" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="SecondNo" class="control-label"></label>
+                <input asp-for="SecondNo" class="form-control" />
+                <span asp-validation-for="SecondNo" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="UserName" class="control-label"></label>
+                <input asp-for="UserName" class="form-control" />
+                <span asp-validation-for="UserName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<hr>
+<link href="~/lib/datepicker/material.css" rel="stylesheet" />
+
+<div class="container">
+    <br />
+    <div style="width:90%; margin:0 auto;">
+        <input type="text" id="userName" placeholder="User Name" onkeyup="myFunction()" />&nbsp;&nbsp;&nbsp;
+        <label>From Date: </label><input id="datepicker" type="text" class="S_TO_DATE" name="S_TO_DATE">&nbsp;&nbsp;&nbsp;
+        <label>To Date: </label><input id="datepicker1" type="text" class="S_FROM_DATE" name="S_FROM_DATE">
+        <button type="button" id="search" class="buttonC">Search</button>
+        <button type="button" id="Clear" class="button btn-info" style="height:40px;">Clear</button>
+       
+    <br />
+    <div style="width:90%; margin:0 auto;">
+        <table id="example" class="table table-striped table-bordered dt-responsive nowrap" width="100%" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>CreateDate</th>
+                    <th>FirstNo</th>
+                    <th>SecondNo</th>
+                    <th>SumOfTwo</th>
+                    <th>UserName</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<script src="~/lib/datepicker/ej2.min.js"></script>
+
+<script>
+
+    $(document).ready(function () {
+        var datepicker = new ej.calendars.DatePicker({ width: "255px" });
+        datepicker.appendTo('#datepicker');
+
+        var datepicker1 = new ej.calendars.DatePicker({ width: "255px" });
+        datepicker1.appendTo('#datepicker1');
+        
+        myFunction();
+
+        $("#userName").keypress(function () {
+            myFunction();
+        });
+
+        $("#search").click(function () {
+            var fromDate = $("#datepicker").val();
+            var toDate = $("#datepicker1").val();
+            if (toDate == null) {
+                alert("To Date " + toDate);
+            }
+            alert("From Date " + fromDate);
+            $.ajax({
+                url: "@Url.Action("SearchingWithDate", "Home")",
+                data: ({
+                    fromDate: fromDate,
+                    toDate: toDate,
+                }),
+                type: 'POST',
+                success: function (data) {
+                    ShowData(data);
+                },
+                error: function (xhr, status, error) {
+                    console.log("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
+                }
+            });
+        });
+
+        });
+
+        function myFunction() {
+            var userName = $("#userName").val();
+            //alert("test" + userName);
+            $.ajax({
+                url: "@Url.Action("Searching", "Home")",
+                data: ({
+                    userName: userName
+                }),
+                type: 'POST',
+                success: function (data) {
+                    ShowData(data);
+                },
+                error: function (xhr, status, error) {
+                    console.log("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
+                }
+            });
+        }
+
+        function ShowData(data) {
+            var strResponse = "";
+            var i;
+
+            for (i = 0; i < data.list.length; i++) {
+                strResponse += "<tr>";
+                    strResponse += "<td>";
+                    strResponse += data.list[i].createDate;
+                    strResponse += "</td>";
+                    strResponse += "<td>";
+                    strResponse += data.list[i].firstNo;
+                    strResponse += "</td>";
+                    strResponse += "<td>";
+                    strResponse += data.list[i].secondNo;
+                    strResponse += "</td>";
+                    strResponse += "<td>";
+                    strResponse += data.list[i].sumOfTwo;
+                    strResponse += "</td>";
+                    strResponse += "<td>";
+                    strResponse += data.list[i].userName;
+                    strResponse += "</td>";
+                strResponse += "</tr>";
+            }
+
+            $("tbody").html(strResponse);
+        }    
+
+    $("#Clear").click(function () {
+        Clear();
+        myFunction();
+    });
+
+    function Clear() {
+        $("#userName").val('');
+        $("#datepicker").val('');
+        $("#datepicker1").val('');
+    }
+
+</script>
+
